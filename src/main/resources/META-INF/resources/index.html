@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>JWT Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css"
+        integrity="sha512-oHDEc8Xed4hiW6CxD7qjbnI+B07vDdX7hEPTvn9pSZO1bcRqHp8mj9pyr+8RVC2GmtEfI2Bi9Ke9Ass0as+zpg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            color: #333;
+            background-color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            font-weight: 600;
+        }
+
+        nav {
+            background-color: #1967be;
+            color: #fff;
+            padding: 0.5rem 1rem;
+
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+
+        main {
+            display: flex;
+            flex: 1;
+            flex-direction: row;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            max-width: 900px;
+            flex-direction: column;
+            justify-content: center;
+            align-items: stretch;
+            padding: 0 1rem;
+            gap: 2rem;
+        }
+
+        footer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 2rem;
+            background-color: hsl(0, 0%, 97%);
+            margin-top: 3rem;
+        }
+
+        .control {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-weight: 500;
+            font-size: 1.2rem;
+        }
+
+        textarea {
+            resize: none;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .buttons {
+            align-self: flex-end;
+            display: flex;
+            flex-direction: row;
+            gap: 1rem;
+        }
+
+        button {
+            background-color: hsl(212, 77%, 47%);
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: 500;
+            padding: 0.75rem 1rem;
+            border: 0;
+        }
+
+        button:hover {
+            cursor: pointer;
+            background-color: hsl(212, 77%, 37%);
+        }
+
+        button:active {
+            background-color: hsl(212, 77%, 27%)
+        }
+
+        button.secondary {
+            background-color: hsl(0, 0%, 90%);
+            color: hsl(0, 0%, 40%);
+        }
+
+        button.secondary:hover {
+            background-color: hsl(0, 0%, 80%);
+        }
+
+        button.secondary:active {
+            background-color: hsl(0, 0%, 70%)
+        }
+
+        p {
+            margin: 0;
+            color: hsl(0, 0%, 40%)
+        }
+
+        p.error {
+            color: hsl(0, 100%, 50%);
+            font-weight: 500;
+        }
+    </style>
+</head>
+
+<body>
+    <nav role="navigation">
+        <div class="container">
+            <h1>JWT Generator</h1>
+        </div>
+    </nav>
+    <main>
+        <div class="container">
+            <p style="margin-top: 2rem;">
+                This simple tool generates JWTs for testing purposes. It is useful when you have an API that
+                is secured using the Bearer authentication scheme with JWTs and you want to test it in different
+                scenarios.
+                Simply enter the desired payload of your JWT and click "Generate JWT". The resulting token will appear in
+                the box below.
+            </p>
+            <div class="control">
+                <label for="payload">JWT Payload</label>
+                <textarea id="payload" name="payload" rows="10" required
+                    placeholder="Enter the desired JWT payload here"></textarea>
+                <p class="error" id="error" style="display: none;">Please enter a valid JSON payload</p>
+                <div class="buttons">
+                    <button type="button" class="secondary" id="sample">Sample Payload</button>
+                    <button type="button" id="generate">Generate JWT</button>
+                </div>
+            </div>
+            <div class="control">
+                <label for="output">Generated JWT</label>
+                <textarea id="output" disabled name="output" rows="10"
+                    placeholder="Your JWT will appear here when you click 'Generate JWT'"></textarea>
+                <p>You can inspect the resulting token using a site like <a target="_blank"
+                        href="https://jwt.ms">jwt.ms</a></p>
+            </div>
+            <div>
+                <h2>How can my application verify this token?</h2>
+                <p>
+                    Your application will need to have a public key that corresponds to the private key that was used to
+                    sign the token. We expose this information as a JWK (JSON Web Key) Set at the following endpoint:
+                    <a href="/quarkus-example-http/jwt/jwks">/jwt/jwks</a>. You can either copy the key from there or configure your
+                    application to fetch it from the endpoint.
+                </p>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <span>Created by <a href="#">Alex Rovner</a></span>
+        <span>View on <a href="#">Github</a></span>
+    </footer>
+</body>
+
+<script>
+    const generateButton = document.getElementById('generate');
+    const sampleButton = document.getElementById('sample');
+    const payloadInput = document.getElementById('payload');
+    const jwtOutput = document.getElementById('output');
+    const error = document.getElementById('error');
+    jwtOutput.value = "";
+
+    sampleButton.addEventListener('click', () => {
+        payloadInput.value = `{
+    "sub": "1234567890",
+    "name": "John Doe",
+    "admin": true
+}`;
+    });
+
+    generateButton.addEventListener('click', () => {
+        const payload = payloadInput.value;
+        try {
+            let pload = JSON.parse(payload);
+            if (typeof pload !== "object" || Array.isArray(pload))
+                throw new Error("Invalid JSON");
+            error.style.display = "none";
+        } catch (e) {
+            error.style.display = "block";
+            return;
+        }
+        generateButton.textContent = "Generating...";
+        generateButton.disabled = true;
+        fetch("/quarkus-example-http/jwt", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: payload
+        }).then(res => res.json()).then(res => {
+            if (res.error) {
+                jwtOutput.value = res.error;
+                return;
+            }
+            jwtOutput.value = res.token;
+        }).catch(err => {
+            jwtOutput.value = err;
+        }).finally(() => {
+            generateButton.textContent = "Generate JWT";
+            generateButton.disabled = false;
+        });
+    });
+</script>
+
+</html>
