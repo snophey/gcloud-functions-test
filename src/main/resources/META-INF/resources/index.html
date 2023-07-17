@@ -173,7 +173,7 @@
                 <p>
                     Your application will need to have a public key that corresponds to the private key that was used to
                     sign the token. We expose this information as a JWK (JSON Web Key) Set at the following endpoint:
-                    <a href="/quarkus-example-http/jwt/jwks">/jwt/jwks</a>. You can either copy the key from there or configure your
+                    <a href="/jwt/jwks">/jwt/jwks</a>. You can either copy the key from there or configure your
                     application to fetch it from the endpoint.
                 </p>
             </div>
@@ -214,7 +214,7 @@
         }
         generateButton.textContent = "Generating...";
         generateButton.disabled = true;
-        fetch("/quarkus-example-http/jwt", {
+        fetch("/jwt", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
