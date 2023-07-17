@@ -1,6 +1,6 @@
 # jwtgen
 
-This simple tool generates JWTs for testing purposes. It is useful when you have an API that is secured using the Bearer authentication scheme with JWTs and you want to test it in different scenarios.
+This simple tool generates JWTs for testing purposes. It is useful when you have an API that is secured using the Bearer authentication scheme with JWTs and you want to test it in different scenarios. To use the tool, visit [jwtgen.dev](jwtgen.dev).
 
 This project uses Quarkus, the Supersonic Subatomic Java Framework.
 
